@@ -1,0 +1,5 @@
+defaultBaseImage: gcr.io/distroless/static-debian12
+env:
+  - CGO_ENABLED=0
+platforms: [linux/amd64, linux/arm64, windows/arm64, darwin/arm64]
+sbom: true

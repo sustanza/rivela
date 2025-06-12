@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write     # needed to upload assets to the release
+  packages: write     # push images to GHCR
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.x"
+          cache: true
+      - uses: ko-build/setup-ko@v0.9
+      - name: Build & publish container images
+        run: ko build . --platform=all  # main package lives at repo root
+
+      # --- Build CLI binaries for common platforms -----------------------
+      - name: Cross‑compile binaries
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          VERSION="${{ github.event.release.tag_name }}"
+          # linux/amd64
+          GOOS=linux   GOARCH=amd64   go build -o dist/rivela-${VERSION}-linux-amd64   .
+          # darwin/arm64 (Apple Silicon)
+          GOOS=darwin  GOARCH=arm64   go build -o dist/rivela-${VERSION}-darwin-arm64  .
+          # windows/amd64
+          GOOS=windows GOARCH=amd64   go build -o dist/rivela-${VERSION}-windows-amd64.exe .
+
+      # --- Upload all binaries as release assets -------------------------
+      - name: Upload binaries
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/rivela-${{ github.event.release.tag_name }}-linux-amd64
+            dist/rivela-${{ github.event.release.tag_name }}-darwin-arm64
+            dist/rivela-${{ github.event.release.tag_name }}-windows-amd64.exe

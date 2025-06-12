@@ -1,0 +1,9 @@
+ rivela:
+   hosts:
+     - example.com
+   port: 443
+   concurrency: 5
+   full_cipher: false
+   insecure: false
+  output_format: text # text, json or csv
+   timeout: 5s

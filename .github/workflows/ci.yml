@@ -1,0 +1,43 @@
+name: CI
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Lint Commits
+        uses: wagoid/commitlint-github-action@v5
+        with:
+          configFile: .commitlintrc.json
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.3"
+          cache: true
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test (race + coverage)
+        run: |
+          go test -race -coverprofile=coverage.out ./...
+          go tool cover -func=coverage.out
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v8
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage.out
