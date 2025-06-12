@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0 (2025-06-12)
+
+
+### Features
+
+* birth ([aa6df12](https://github.com/sustanza/rivela/commit/aa6df128617f5b944957e30aee8bc7af216ce764))
+
 ## [1.4.0](https://github.com/sustanza/rivela/compare/v1.3.4...v1.4.0) (2025-06-11)
 
 
